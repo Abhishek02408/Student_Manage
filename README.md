@@ -6,8 +6,8 @@ This project is basically used to manage all the details of various student such
 #include <iostream>
 #include <string>
 #include <vector>
-#include<conio.h>
-#include<stdlib.h>
+#include<conio>
+#include<stdlib>
 using namespace std;
 
 // Define a Student class to store student details
