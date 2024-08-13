@@ -1,88 +1,156 @@
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include<conio>
-#include<stdlib>
+
 using namespace std;
 
-// Define a Student class to store student details
+// Enum for Attendance Status
+enum class AttendanceStatus { Present, Absent, Late };
+
+// Student class
 class Student {
-private:
-    string name;
-    int rollNumber;
-    vector<int> marks;
-    char grade;
-    int attendance;
-
 public:
-    // Constructor to initialize student object
-    Student(string name, int rollNumber) : name(name), rollNumber(rollNumber), grade('F'), attendance(0) {}
+    string id;
+    string name;
+    unordered_map<string, AttendanceStatus> attendance;
+    unordered_map<string, double> grades;
+    vector<string> behaviorIncidents;
 
-    // Function to add marks for a subject
-    void addMarks(int mark) {
-        marks.push_back(mark);
+    Student(const string& id, const string& name) : id(id), name(name) {}
+
+    void addGrade(const string& course, double grade) {
+        grades[course] = grade;
     }
 
-    // Function to calculate grade based on marks
-    void calculateGrade() {
-        int totalMarks = 0;
-        for (int mark : marks) {
-            totalMarks += mark;
+    void addAttendance(const string& date, AttendanceStatus status) {
+        attendance[date] = status;
+    }
+
+    void addBehaviorIncident(const string& incident) {
+        behaviorIncidents.push_back(incident);
+    }
+};
+
+// Attendance Module
+class AttendanceModule {
+public:
+    void markAttendance(Student& student) {
+        string date;
+        int status;
+
+        cout << "Enter date (YYYY-MM-DD): ";
+        cin >> date;
+
+        cout << "Enter status (0 for Present, 1 for Absent, 2 for Late): ";
+        cin >> status;
+
+        student.addAttendance(date, static_cast<AttendanceStatus>(status));
+    }
+
+    void viewAttendance(const Student& student) {
+        for (const auto& [date, status] : student.attendance) {
+            cout << "Date: " << date << " - Status: " 
+                 << (status == AttendanceStatus::Present ? "Present" : status == AttendanceStatus::Absent ? "Absent" : "Late") 
+                 << endl;
         }
-        int averageMarks = totalMarks / marks.size();
+    }
+};
 
-        if (averageMarks >= 90) {
-            grade = 'A';
-        } else if (averageMarks >= 80) {
-            grade = 'B';
-        } else if (averageMarks >= 70) {
-            grade = 'C';
-        } else if (averageMarks >= 60) {
-            grade = 'D';
-        } else {
-            grade = 'F';
+// Grades Module
+class GradesModule {
+public:
+    void enterGrade(Student& student) {
+        string course;
+        double grade;
+
+        cout << "Enter course name: ";
+        cin >> course;
+
+        cout << "Enter grade: ";
+        cin >> grade;
+
+        student.addGrade(course, grade);
+    }
+
+    void viewGrades(const Student& student) {
+        for (const auto& [course, grade] : student.grades) {
+            cout << "Course: " << course << " - Grade: " << grade << endl;
         }
     }
+};
 
-    // Function to update attendance
-    void updateAttendance(int daysPresent) {
-        attendance += daysPresent;
+// Behavioral Module
+class BehavioralModule {
+public:
+    void logIncident(Student& student) {
+        string incident;
+
+        cout << "Enter behavior incident description: ";
+        cin.ignore();  // Ignore the newline character from previous input
+        getline(cin, incident);
+
+        student.addBehaviorIncident(incident);
     }
 
-    // Function to display student details
-    void displayDetails() {
-        cout << "Name: " << name << endl;
-        cout << "Roll Number: " << rollNumber << endl;
-        cout << "Grade: " << grade << endl;
-        cout << "Attendance: " << attendance << " days" << endl;
+    void viewBehaviorReport(const Student& student) {
+        cout << "Behavioral Incidents for " << student.name << ":" << endl;
+        for (const auto& incident : student.behaviorIncidents) {
+            cout << " - " << incident << endl;
+        }
     }
 };
 
 int main() {
-    string name;
-    int roll;
-    cout<<"                     **Student Details**                           "<<endl;
-    //Taking input as Student details
-    cout<<"Student Naame:"<<"\t";
-    cin>>name;
-    cout<<"Roll_Number:"<<"\t";
-    cin>>roll;
-    // Create a Student object
-    Student student(name,roll);
+    // Create a sample student
+    Student student("123", "John Doe");
 
-    // Add marks for different subjects
-    student.addMarks(85);
-    student.addMarks(78);
-    student.addMarks(92);
+    // Create module instances
+    AttendanceModule attendanceModule;
+    GradesModule gradesModule;
+    BehavioralModule behavioralModule;
 
-    // Calculate grade based on marks
-    student.calculateGrade();
+    int choice;
 
-    // Update attendance
-    student.updateAttendance(20);
+    do {
+        cout << "\nSchool Management System\n";
+        cout << "1. Mark Attendance\n";
+        cout << "2. View Attendance\n";
+        cout << "3. Enter Grade\n";
+        cout << "4. View Grades\n";
+        cout << "5. Log Behavior Incident\n";
+        cout << "6. View Behavior Report\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
 
-    // Display student details
-    student.displayDetails();
+        switch (choice) {
+            case 1:
+                attendanceModule.markAttendance(student);
+                break;
+            case 2:
+                attendanceModule.viewAttendance(student);
+                break;
+            case 3:
+                gradesModule.enterGrade(student);
+                break;
+            case 4:
+                gradesModule.viewGrades(student);
+                break;
+            case 5:
+                behavioralModule.logIncident(student);
+                break;
+            case 6:
+                behavioralModule.viewBehaviorReport(student);
+                break;
+            case 0:
+                cout << "Exiting...\n";
+                break;
+            default:
+                cout << "Invalid choice! Please try again.\n";
+                break;
+        }
+    } while (choice != 0);
 
     return 0;
 }
